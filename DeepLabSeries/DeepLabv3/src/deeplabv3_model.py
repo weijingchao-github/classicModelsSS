@@ -8,6 +8,9 @@ from .mobilenet_backbone import mobilenet_v3_large
 
 
 class DeepLabv3(nn.Module):
+
+    __constants__ = ['aux_classifier']
+
     def __init__(self, backbone, classifier, aux_classifier=None):
         super(DeepLabv3, self).__init__()
         self.backbone = backbone
