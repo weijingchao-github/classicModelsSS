@@ -48,11 +48,11 @@ def get_transform(train):
     return SegmentationPresetTrain(base_size, crop_size) if train else SegmentationPresetEval(base_size)
 
 
-def create_model(aux, num_classes, pretrain=True):
+def create_model(aux, num_classes, pretrain=False):
     model = deeplabv3_resnet50(aux=aux, num_classes=num_classes)
 
     if pretrain:
-        weights_dict = torch.load("./deeplabv3_resnet50_coco.pth", map_location='cpu')
+        weights_dict = torch.load("./pretrained_weights/deeplabv3_resnet50_coco-cd0a2569.pth", map_location='cpu')
 
         if num_classes != 21:
             # 官方提供的预训练权重是21类(包括背景)
@@ -76,7 +76,7 @@ def main(args):
     num_classes = args.num_classes + 1
 
     # 用来保存训练以及验证过程中信息
-    results_file = "results{}.txt".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    results_file = "results/resnet50_wipretrain/results{}.txt".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 
     # VOCdevkit -> VOC2012 -> ImageSets -> Segmentation -> train.txt
     train_dataset = VOCSegmentation(args.data_path,
@@ -168,7 +168,7 @@ def main(args):
                      "args": args}
         if args.amp:
             save_file["scaler"] = scaler.state_dict()
-        torch.save(save_file, "save_weights/model_{}.pth".format(epoch))
+        torch.save(save_file, "results/resnet50_wipretrain/save_weights/model_{}.pth".format(epoch))
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -179,11 +179,11 @@ def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description="pytorch deeplabv3 training")
 
-    parser.add_argument("--data-path", default="../Dataset/VOC/", help="VOCdevkit root")
+    parser.add_argument("--data-path", default="../../Dataset/VOCtrainval_11-May-2012/", help="VOCdevkit root")
     parser.add_argument("--num-classes", default=20, type=int)
     parser.add_argument("--aux", default=True, type=bool, help="auxilier loss")
     parser.add_argument("--device", default="cuda", help="training device")
-    parser.add_argument("-b", "--batch-size", default=4, type=int)
+    parser.add_argument("-b", "--batch-size", default=8, type=int)
     parser.add_argument("--epochs", default=30, type=int, metavar="N",
                         help="number of total epochs to train")
 
@@ -209,7 +209,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    if not os.path.exists("./save_weights"):
-        os.mkdir("./save_weights")
+    if not os.path.exists("results/resnet50_wipretrain/save_weights"):
+        os.mkdir("results/resnet50_wipretrain/save_weights")
 
     main(args)

@@ -81,7 +81,7 @@ class FCNHead(nn.Sequential):
 
 
 class ASPPConv(nn.Sequential):
-    def __int__(self, in_channels: int, out_channels: int, dilation: int) -> None:
+    def __init__(self, in_channels: int, out_channels: int, dilation: int) -> None:
         super(ASPPConv, self).__init__(
             nn.Conv2d(in_channels, out_channels, 3, padding=dilation, dilation=dilation, bias=False),
             nn.BatchNorm2d(out_channels),
@@ -90,7 +90,7 @@ class ASPPConv(nn.Sequential):
 
 
 class ASPPPooling(nn.Sequential):
-    def __int__(self, in_channels: int, out_channels: int) -> None:
+    def __init__(self, in_channels: int, out_channels: int) -> None:
         super(ASPPPooling, self).__init__(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(in_channels, out_channels, 1, bias=False),

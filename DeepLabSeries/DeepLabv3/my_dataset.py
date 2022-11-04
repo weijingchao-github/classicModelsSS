@@ -58,6 +58,46 @@ def cat_list(images, fill_value=0):
     return batched_imgs
 
 
-# dataset = VOCSegmentation(voc_root="/data/", transforms=get_transform(train=True))
-# d1 = dataset[0]
-# print(d1)
+if __name__ == '__main__':
+    import transforms as T
+    class SegmentationPresetTrain:
+        def __init__(self, base_size, crop_size, hflip_prob=0.5, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
+            min_size = int(0.5 * base_size)
+            max_size = int(2.0 * base_size)
+
+            trans = [T.RandomResize(min_size, max_size)]
+            if hflip_prob > 0:
+                trans.append(T.RandomHorizontalFlip(hflip_prob))
+            trans.extend([
+                T.RandomCrop(crop_size),
+                T.ToTensor(),
+                T.Normalize(mean=mean, std=std),
+            ])
+            self.transforms = T.Compose(trans)
+
+        def __call__(self, img, target):
+            return self.transforms(img, target)
+
+
+    class SegmentationPresetEval:
+        def __init__(self, base_size, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)):
+            self.transforms = T.Compose([
+                T.RandomResize(base_size, base_size),
+                T.ToTensor(),
+                T.Normalize(mean=mean, std=std),
+            ])
+
+        def __call__(self, img, target):
+            return self.transforms(img, target)
+
+
+    def get_transform(train):
+        base_size = 520
+        crop_size = 480
+
+        return SegmentationPresetTrain(base_size, crop_size) if train else SegmentationPresetEval(base_size)
+
+
+    dataset = VOCSegmentation(voc_root="../../Dataset/VOCtrainval_11-May-2012/", transforms=get_transform(train=True))
+    d1 = dataset[0]
+    print(d1)

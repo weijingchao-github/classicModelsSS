@@ -13,7 +13,7 @@ def pad_if_smaller(img, size, fill=0):
         ow, oh = img.size
         padh = size - oh if oh < size else 0
         padw = size - ow if ow < size else 0
-        img = F.pad(img, (0, 0, padw, padh), fill=fill)
+        img = F.pad(img, [0, 0, padw, padh], fill=fill)
     return img
 
 
